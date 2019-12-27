@@ -7,9 +7,7 @@ Class {
 	#category : 'TonelLoaderTests'
 }
 
-{
-	#category : 'Initialization'
-}
+{ #category : 'Initialization' }
 TonelLoaderTest >> setUp [
 	super setUp.
 	self writer: (TonelWriter on: self fileSystem).
@@ -21,9 +19,7 @@ TonelLoaderTest >> setUp [
 	loader := TonelLoader on: reader
 ]
 
-{
-	#category : 'Tests'
-}
+{ #category : 'Tests' }
 TonelLoaderTest >> testApplicationHierarchy [
 
 	| rootApp |
@@ -34,9 +30,7 @@ TonelLoaderTest >> testApplicationHierarchy [
 	
 ]
 
-{
-	#category : 'Tests'
-}
+{ #category : 'Tests' }
 TonelLoaderTest >> testConditions [
 
 	| rootApp subApp |
@@ -48,21 +42,19 @@ TonelLoaderTest >> testConditions [
 	
 ]
 
-{
-	#category : 'Initialization'
-}
+{ #category : 'Initialization' }
 TonelLoaderTest >> tonelWriterTestAppName [
 	^'TonelWriterTests'
 ]
 
-{
-	#category : 'Tests - Support'
-}
+{ #category : 'Tests - Support' }
 TonelLoaderTest >> writeThenReadProjectIncluding: applicationNames from: aRootDirPath [
 
-	self writer
-		writeProjectIncluding: (applicationNames collect: [:each | Smalltalk at: each asSymbol])
-		sourceDirectoryNamed: 'source'
-		into: aRootDirPath.
-	self reader readPackages: applicationNames fromSourceDir: (aRootDirPath append: 'source')
+	self writer 
+		writeProjectIncluding: (applicationNames 
+				collect: [:each | Smalltalk at: each asSymbol])
+		into: aRootDirPath
+		sourceDirectoryName: 'source'.
+	self reader readPackages: applicationNames
+		fromSourceDir: (aRootDirPath append: 'source')
 ]

@@ -12,9 +12,7 @@ Class {
 	#category : 'TonelLoaderModel'
 }
 
-{
-	#category : 'Not categorized'
-}
+{ #category : 'Not categorized' }
 TonelApplicationLoader class >> on: aTonelApplication in: aTonelLoader [
 
 	^self new
@@ -22,38 +20,7 @@ TonelApplicationLoader class >> on: aTonelApplication in: aTonelLoader [
 		yourself
 ]
 
-{
-	#category : 'querying'
-}
-TonelApplicationLoader >> allLoadedApplications [
-	
-	^self loader loadedApplications
-]
-
-{
-	#category : 'versioning',
-	#vaVisibility : 'private'
-}
-TonelApplicationLoader >> attemptVersionFromGit [
-	"Private - Attempts to read git metadata from the repository path of the loader (if available)."
-
-	(self loader reader repositoryPath) ifNotNil: [:repoPath | | gitMasterCheckoutFile gitMasterPath
-		  commitHash |
-		(gitMasterPath := ((((repoPath append: '.git') append: 'refs') append: 'heads')
-			append: 'master'))
-				exists
-					ifTrue: [
-						gitMasterCheckoutFile := CfsReadFileStream open: gitMasterPath asString.
-						[commitHash := (gitMasterCheckoutFile nextLine first: 7)]
-							ensure: [gitMasterCheckoutFile close].
-						commitHash isEmptyOrNil ifFalse: [self versionName: commitHash]]]
-
-
-]
-
-{
-	#category : 'loading-internal'
-}
+{ #category : 'loading-internal' }
 TonelApplicationLoader >> autogenerateClassSideNewInitializers [
 
 	| allDefinedClasses superclasses |
@@ -68,82 +35,62 @@ TonelApplicationLoader >> autogenerateClassSideNewInitializers [
 				tonelClass addMethod: (TonelReaderMethodDefinition newInitializeMethodFor: aSuperclass)]]
 ]
 
-{
-	#category : 'loading-internal'
-}
+{ #category : 'loading-internal' }
 TonelApplicationLoader >> checkClassExtensions [
 
 	self tonelApplication checkClassExtensionsExcepting: self tonelApplication allDefinedClassNames
 ]
 
-{
-	#category : 'loading-internal',
-	#vaVisibility : 'private'
-}
+{ #category : 'loading-internal',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> checkForUnloadedApplication [
 
-	self tonelApplication loadBaseApplication
+	Smalltalk classAt: self tonelApplication identifier ifAbsent: [
+		(Application allNamesWithoutPackages includes: self tonelApplication identifier)
+			ifTrue: [self loader loadBaseEditionFor: self tonelApplication ] ]
 ]
 
-{
-	#category : 'loading-internal'
-}
+{ #category : 'loading-internal' }
 TonelApplicationLoader >> checkSuperclasses [
 
 	self tonelApplication checkSuperclassesExcepting: self tonelApplication allDefinedClasses
 ]
 
-{
-	#category : 'loading-internal',
-	#vaVisibility : 'private'
-}
+{ #category : 'loading-internal',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> checkThatUserCanModifyApplication [
 
 	self tonelApplication verifyBaseEditionUser
 ]
 
-{
-	#category : 'loading-prompters',
-	#vaVisibility : 'private'
-}
+{ #category : 'loading-prompters',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> choosePrerequisites [
-
-	self tonelApplication prerequisites: (EtPrerequisiteCollectingPrompter
-		prompt: ('Please select the prequisites for %1 (chains will be resolved after selection)' bindWith: self tonelApplication name)  "$NLS$ Please select the prequisites for %1 (chains will be resolved after selection)"
-		chooseFrom: (
-			self allLoadedApplications reject: [ :anApp | 
-				self tonelApplication allDependentApplications includes: anApp ])
-		current: self tonelApplication prerequisites
-		alwaysRequired: (Set with: Kernel))
+	self tonelApplication prerequisites: self computePrerequisites
 ]
 
-{
-	#category : 'loading-prompters',
-	#vaVisibility : 'private'
-}
+{ #category : 'loading-prompters',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> chooseVersionName [
-	"The version name string may be empty if the user pressed OK without entering
-	 anything (or deleting the pre-entered name), or nil if the user pressed Cancel."
 
-	self attemptVersionFromGit.
-	self versionName: (
-		(System prompt: TonelMsg11 answer: self versionName) "$NLS$ Enter the version name to be used for imported classes and applications"
-			ifNil: ['']) "$NON-NLS$"
+	self versionName: (self loader versionFor: self tonelApplication)
+	
 ]
 
-{
-	#category : 'loading-internal'
-}
+{ #category : 'loading-prompters' }
+TonelApplicationLoader >> computePrerequisites [
+	^self loader prerequisitesFor: self tonelApplication current:  tonelApplication prerequisites
+]
+
+{ #category : 'loading-internal' }
 TonelApplicationLoader >> convertSharedPoolClasses [
 	"Enter the new method definition below and click 'Resume'."
 	
 	self tonelApplication convertSharedPoolClasses
 ]
 
-{
-	#category : 'loading-internal',
-	#vaVisibility : 'private'
-}
+{ #category : 'loading-internal',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> createAndLoadApplication [
 	"The contents of the Monticello file has been parsed and converted to classes representing
 	 the content. Now process those classes to create real classes in the application."
@@ -162,19 +109,15 @@ TonelApplicationLoader >> createAndLoadApplication [
 		initializeApplication
 ]
 
-{
-	#category : 'loading-internal',
-	#vaVisibility : 'private'
-}
+{ #category : 'loading-internal',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> createApplication [
 
 	self tonelApplication create
 ]
 
-{
-	#category : 'loading-internal',
-	#vaVisibility : 'private'
-}
+{ #category : 'loading-internal',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> createClasses [
 
 	(self tonelApplication allClassesWithAssociation tonelSingleEdgeTopologicallySortedCollection
@@ -182,61 +125,54 @@ TonelApplicationLoader >> createClasses [
 			do: [:ea | ea key createEditionIn: ea value]
 ]
 
-{
-	#category : 'querying'
-}
+{ #category : 'loading-internal',
+  #vaVisibility : 'private' }
+TonelApplicationLoader >> createTonelMetadataMethods [
+
+	self tonelApplication createTonelMetadataMethods
+]
+
+{ #category : 'querying' }
 TonelApplicationLoader >> definedClasses [
 
 	^self tonelApplication definedClasses
 ]
 
-{
-	#category : 'loading-internal',
-	#vaVisibility : 'private'
-}
+{ #category : 'loading-internal',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> definePoolDictionaries [
 
 	self tonelApplication definePoolDictionaries
 ]
 
-{
-	#category : 'querying'
-}
+{ #category : 'querying' }
 TonelApplicationLoader >> deletedClasses [
 
 	^ self tonelApplication allClassesToRemoveIncludingExtensions: true
 ]
 
-{
-	#category : 'loading-internal'
-}
+{ #category : 'loading-internal' }
 TonelApplicationLoader >> deletedDefinedClasses [
 
 	^ self tonelApplication allClassesToRemoveIncludingExtensions: false
 ]
 
-{
-	#category : 'loading-internal',
-	#vaVisibility : 'private'
-}
+{ #category : 'loading-internal',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> deleteRemovedClasses [
 
 	self deletedClasses tonelSingleEdgeTopologicallySortedCollection reverseDo: [ :ea |
 		ea value deleteClasses: (Array with: ea key) ]
 ]
 
-{
-	#category : 'loading-internal',
-	#vaVisibility : 'private'
-}
+{ #category : 'loading-internal',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> deleteRemovedSubApplications [
 
 	self tonelApplication deleteRemovedSubApplications
 ]
 
-{
-	#category : 'querying'
-}
+{ #category : 'querying' }
 TonelApplicationLoader >> detectAllRootSuperclassesWithinApp [
 
 	| superclasses allDefinedClasses superclassBlock |
@@ -254,18 +190,14 @@ TonelApplicationLoader >> detectAllRootSuperclassesWithinApp [
 	^superclasses
 ]
 
-{
-	#category : 'loading-internal',
-	#vaVisibility : 'private'
-}
+{ #category : 'loading-internal',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> initializeApplication [
 
 	self tonelApplication initialize
 ]
 
-{
-	#category : 'loading'
-}
+{ #category : 'loading' }
 TonelApplicationLoader >> load [
 
 	self loader log: (TonelMsg20 expandMacrosWith: self tonelApplication name).
@@ -283,28 +215,22 @@ TonelApplicationLoader >> load [
 				do: [:ex | ex pass]
 ]
 
-{
-	#category : 'loading-internal',
-	#vaVisibility : 'private'
-}
+{ #category : 'loading-internal',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> loadApplication [
 
 	self tonelApplication loadFor: self
 ]
 
-{
-	#category : 'accessing',
-	#vaVisibility : 'private'
-}
+{ #category : 'accessing',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> loader [
 
 	^loader
 ]
 
-{
-	#category : 'loading-internal',
-	#vaVisibility : 'private'
-}
+{ #category : 'loading-internal',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> prepareRemovedClasses [
 
 	EmClassCreator waitForMultipleChanges.
@@ -332,28 +258,22 @@ TonelApplicationLoader >> prepareRemovedClasses [
 	EmClassCreator finishedMultipleChanges
 ]
 
-{
-	#category : 'initializing',
-	#vaVisibility : 'private'
-}
+{ #category : 'initializing',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> setTonelApplication: aTonelApplication loader: aTonelLoader [
 
 	tonelApplication := aTonelApplication.
 	loader  := aTonelLoader
 ]
 
-{
-	#category : 'accessing'
-}
+{ #category : 'accessing' }
 TonelApplicationLoader >> tonelApplication [
 
 	^tonelApplication
 ]
 
-{
-	#category : 'loading-internal',
-	#vaVisibility : 'private'
-}
+{ #category : 'loading-internal',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> updateClassDefinitions [
 
 	EmClassCreator waitForMultipleChanges.
@@ -361,26 +281,20 @@ TonelApplicationLoader >> updateClassDefinitions [
 	EmClassCreator finishedMultipleChanges
 ]
 
-{
-	#category : 'loading-internal',
-	#vaVisibility : 'private'
-}
+{ #category : 'loading-internal',
+  #vaVisibility : 'private' }
 TonelApplicationLoader >> versionApplication [
 
 	self tonelApplication versionFor: self
 ]
 
-{
-	#category : 'accessing'
-}
+{ #category : 'accessing' }
 TonelApplicationLoader >> versionName [
 
 	^versionName
 ]
 
-{
-	#category : 'accessing'
-}
+{ #category : 'accessing' }
 TonelApplicationLoader >> versionName: aVersionNameOrNil [
 
 	

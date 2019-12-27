@@ -14,7 +14,31 @@
   </p>
 </p>
 
-For [Instantiations](https://www.instantiations.com/) and VASmalltalk, having git support is a priority. The first step is to have a plaintext file based output and input for the sources of its Applications.
+
+
+## Tonel for VAST in a Nutshell
+
+ Supporting the [Tonel format](https://github.com/pharo-vcs/tonel) is a work in progress in VAST 9.2. Our implementation complies with the specification of the format. But since the specification does not take into account some important VAST specific features we extended it in a non intrusive way to make it compatible with the spec and useful to VAST users as well.
+
+There are four main building blocks that work in layers to support Tonel in VA Smalltalk:
+
+### Tonel Parser
+Parses the Tonel specific files following the same rules as the [canonical version](https://github.com/pharo-vcs/tonel).
+
+### Tonel Reader
+Relies on the parser to create first-class objects representing each abstraction from Tonel. E.g. _Package_, _Class_, _Method Definition_, _Method Extension_
+
+### Tonel Loader
+Uses the reader to compile classes, methods, extensions, etc. and then create the required editions and versions in the ENVY Library.
+
+### Tonel Writer
+Writes to disk, in a Tonel compatible format (plus the VAST specific features described below) the Applications, SubApplications, Classes, Shared Pools, Methods, Extensions, etc.
+
+If the Application has a class side `#tonelPackageName` selector it  will then honor it when creating the package name.
+
+
+## Purpose
+For [Instantiations](https://www.instantiations.com/) and VA Smalltalk, having git support is a priority. The first step is to have a plain text file-based output and input for the sources of its Applications.
 
 [Tonel](https://github.com/pharo-vcs/tonel) is the current file format widely accepted by the Smalltalk community to store source code on disk with a VCS-friendly format.
 
@@ -25,50 +49,41 @@ For [Instantiations](https://www.instantiations.com/) and VASmalltalk, having gi
 
 ## Installation
 
-- Download [VAST 9.2 ECAP 2 or newer from Instantiations](https://www.instantiations.com/ecap/).
+- Download [VAST 9.2 or newer from Instantiations](https://www.instantiations.com/products/vasmalltalk/download.html).
 - Clone this repository.
 - From the configuration map browser, import all versions of the `Tonel` map from `envy/Tonel.dat`. Then "Load With Required Maps" the latest version of it.
-- Run SUnit Suite for all `Tonel` map (right click on the map -> `Test Loaded Applications`). You should see around 58 unit tests and most of them passing.
 - Explore the [documentation](docs/).
-
+- (optional) Run SUnit Suite for all `Tonel` map (right click on the map -> `Test Loaded Applications`). You should see around 58 unit tests and all passing.
 
 ## Quick Start
 
+### Using GUI menus
+
 - Open Application Manager and try the menu option "Import/Export" -> "Import Applications from Tonel packages..." and "Export Applications as Tonel packages..."
 <img width="500" alt="Import/Export" src="https://user-images.githubusercontent.com/1032834/64197391-621ea780-ce5c-11e9-8312-55994d01f68e.png">
-- Or..you can do it from code too:
+
+
+### Programmatically
 
 ```smalltalk
-(TonelLoader
- on: (TonelReader new readPackagesFrom:
-   ((CfsPath named: CfsDirectoryDescriptor getcwd) append: '..\TonelRepositories\tonel-demos')))
-     loadApplicationNamed: 'TonelExampleApp'.
-     
-TonelWriter new writeInWorkingDirectoryProjectIncluding: (Array with: TonelExampleApp)
+| reader |
+reader := (TonelReader new readPackagesFrom:
+            ((CfsPath named: CfsDirectoryDescriptor getcwd)
+              append: '..\TonelRepositories\tonel-demos'))).
+reader createLoader loadApplicationNamed: 'TonelExampleApp'.
 
-"WARNING: This deletes everything in the target directory."
+"or you can load by Tonel package name"
+reader createLoader
+  loadApplicationsForPackagesNamed: #('YourPackage-Core' 'YourPackage-Tests').
+
+"Writing back to Tonel"
 TonelWriter new
- writeProjectIncluding: (Array with: TonelTestPackageAApp)  
- into: ((CfsPath named: CfsDirectoryDescriptor getcwd) append: '..\TonelRepositories\tonel-demos').
+	clearSourcesDirectory; "deletes everything in the target directory"
+	writeProjectIncluding: (Array with: TonelExampleApp)
+    into: ((CfsPath named: CfsDirectoryDescriptor getcwd)
+          append: '..\TonelRepositories\tonel-demos').
  ```
 
-## Tonel for VAST in a Nutshell
-
- Supporting the [Tonel format](https://github.com/pharo-vcs/tonel) is a work in progress in VAST 9.2. Our implementation complies with the specification of the format. But since the specification does not take into account some important VAST specific features we extended it in a non intrusive way to make it compatible with the spec and useful to VAST users as well.
- 
-There are four main building blocks that work in layers to support Tonel in VA Smalltalk:
-
-### Tonel Parser
-Parses the Tonel specific files following the same rules as the [canonical version](https://github.com/pharo-vcs/tonel).
-
-### Tonel Reader
-Relies on the parser to create first-class objects representing each abstraction from Tonel. E.g. _Package_, _Class_, _Method Definition_, _Method Extension_
-
-### Tonel Loader
-Uses the reader to compile classes, methods, extensions, etc. And create the required editions and versions in the ENVY Library.
-
-### Tonel Writer
-Writes to disk, in a Tonel compatible format (plus the VAST Specific features described below) the Applications, SubApplications, Methods, Extensions, etc.
 
 ## VAST specific features
 
@@ -76,13 +91,13 @@ Below we list the specific features of VAST and how they're handled.
 
 ### Multiple method categories
 
-Since VAST supports multiple categories per method (not just one), when writing Tonel from VAST if the method has more than one category in addition to the `#category` property containing a single category name, we add a custom `#vaCategories` property to the method definition metadata whose value is an array of category names. 
+Since VAST supports multiple categories per method (not just one), when writing Tonel from VAST if the method has more than one category in addition to the `#category` property containing a single category name, we add a custom `#vaCategories` property to the method definition metadata whose value is an array of category names.
 
 This way, when loading methods from source code, single method categories dialects will read only the `#category` property and the VAST Tonel loader will look for the `vaCategories` (if available).
 
 ### Private and Public methods
 
-In VAST method visibility is not a simple category convention but a boolean property of the method itself, so methods can be treated as `private` or `public` and the tools will accomodate to this accordingly.
+In VAST method visibility is not a simple category convention but a boolean property of the method itself, so methods can be treated as `private` or `public` and the tools will accommodate to this accordingly.
 
 To support this feature we added a `#vaVisibility` property to the method definition metadata whose value is a string containing either `public` or `private` values.
 
@@ -98,11 +113,11 @@ We fulfill this need by adding a custom property named  `#vaPrerequisites` to th
 
 ### Application and SubApplication hierarchy
 
-VAST Applications can contain sub-applications, and these sub-aplications can contain other sub-applications forming a composition tree, each node in the hierarchy conditioning the load of the sub applications to some condition (aka _config expression_, more on this later).
+VAST Applications can contain SubApplications, and these SubApplications can contain other SubApplications forming a composition tree, each node in the hierarchy conditioning the load of the sub applications to some condition (aka _config expression_, more on this later).
 
-Such hierarchy of composition concept is not considered by the original Tonel spec, and for Tonel everything is just a _Package_ on a flat level. 
+Such hierarchy of composition concept is not considered by the original Tonel spec, and for Tonel everything is just a _Package_ on a flat level.
 
-To work around this we map each _Application_ or _Subapplication_ to a _Package_ and write them at the same flat level, also adding VAST specific properties to the package metadata definition, but since the composition is dependant on some _config expression_ (a Smalltalk expression that returns a boolean) we store the expression and the subapplications it would load as as a `#vaSubapplications` property as follows:
+To work around this we map each _Application_ or _Subapplication_ to a _Package_ and write them at the same flat level, also adding VAST specific properties to the package metadata definition. In addition, since the composition depends on some _config expression_ (a Smalltalk expression that returns a boolean) we store the expression and the SubApplications it would load as as a `#vaSubapplications` property as follows:
 
  ```smalltalk
 #vaSubApplications : [
@@ -149,38 +164,41 @@ So extending our example above for the [sample subapp](https://github.com/vasmal
 
 ### Shadow SubApplications Limitation
 
-When an _Application_ or _SubApplication_ has different branches of SubApplications based on different _config expressions_ the subapplications in the branch that is not loaded in the image are called _shadow_ SubApplications. The typical example is some OS-specific features that are loaded based on the OS in which the image is running (e.g. UNIX vs Windows).
+When an _Application_ or _SubApplication_ has different branches of SubApplications based on different _config expressions_ the SubApplications in the branch that is not loaded in the image are called _shadow_ SubApplications. The typical example is some OS-specific features that are loaded based on the OS in which the image is running (e.g. UNIX vs Windows).
 
-The current implementation of Tonel Writer for VAST fully supports writing the conditions and SubApplications to disk, but the Tonel Loader will only compile and create editions for the expressions that are _valid_ (it is, that evaluates to _true_).
+The current implementation of Tonel Writer for VAST fully supports writing the conditions and SubApplications to disk, but the Tonel Loader will only compile and create editions for the applications whose _config expressions_ are _valid_ (it is, that evaluates to _true_).
 
-So if you currently write an existing _Application_ with shadow _SubApplications_ they will be written to disk, but once you load them back, the shadowed ones will not be loaded (and hence not versioned in the ENVY Library).
+So if you now write an existing _Application_ with shadow _SubApplications_ they will be written to disk, but once you load them back, the shadowed ones will not be loaded (and hence not versioned in the ENVY Library).
 
 
 ## Compatibility Recommendations
 
-If you want to make your code fully compatible and interoperable with other Smalltalk dialects you must restrict yourself to the minimum support provided by Tonel.  
+If you want to make your code fully compatible and interoperable with other Smalltalk dialects there is a specific document with the [recommendations for compatibility](docs/compatibility.md).
 
-### Application hierarchy
 
-It is recommended you only use  _Applications_ **without** _SubApplications_, so the mapping _Application_ (VAST) ->_Package_ (Tonel) will be straighforward in both directions.
 
-You could use _SubApplications_ that will be read as _Packages_ in other dialects, but that _hierarchy_ information is going to be lost if the other dialect writes it back to Tonel format. This is so because the "metadata" we use to store the parent application, the config expressions, etc. is not read by other dialects and discarded once written back.
 
-E.g.
-1. You have the VAST Application named `MyCoolApp` with `MyCoolSubappA` and `MyCoolSubAppB`
-2. You write them to disk using the Tonel Writer
-3. You load them into Pharo, they will be imported as three separate _Packages_ `MyCoolApp`, `MyCoolSubappA` and `MyCoolSubAppB` with no specific load order.
-4. Assuming everything loaded correctly, you make some changes in Pharo and write them back to a Tonel repository.
-5. Back in VAST you load from that Tonel repository
-6. Regardless of the names, `MyCoolApp`, `MyCoolSubappA` and `MyCoolSubAppB` will be read as separate _Applications_ because in step 4 no metadata was written about `#vaSubapplications` nor `#vaParent`.
 
-### Method Visibility
+## Shared Pools
 
-For the same reasons as in the Application Hierarchy, all methods should have `public` visibility.
+VAST's way of declaring and/or initializing Shared Pools is different from other Smalltalk dialects, and to explain how this work with Tonel, there is a specific document explaining [how VAST Tonel handles shared pools](docs/sharedpools.md).
 
+
+
+## ENVY Application versions
+
+When loading an Application (from a Tonel package), the loader will ask for the desired version you want to assign. If you don't specify any version, the Application won't be versioned and will remain as an edition.
+
+### Git integration
+
+When reading from a project directory that has a git repository (in `.git` directory), the _loader_ will attempt to read the commit hash and commit timestamp, and suggest the version name of each Application built from them. E.g. `081729b (2019-11-05T15:44:06-03:00)`.
 
 ## Examples and Demos
 There is a [whole Github project](https://github.com/vasmalltalk/tonel-demos/) that contains demos about Tonel integration with VASmalltalk.
+
+## Roadmap / Next steps
+
+See the [roadmap document](docs/roadmap.md) for further details.
 
 
 ## Acknowledgments
@@ -190,4 +208,4 @@ There is a [whole Github project](https://github.com/vasmalltalk/tonel-demos/) t
 
 ## Contributing
 
-Check the [Contribution Guidelines](CONTRIBUTING.md)
+Check the [Contribution Guidelines](docs/CONTRIBUTING.md)

@@ -4,9 +4,7 @@ Class {
 	#category : 'TonelWriterTests'
 }
 
-{
-	#category : 'Not categorized'
-}
+{ #category : 'Not categorized' }
 TonelClassExtensionWriterTest >> setUp [
 
 	super setUp.
@@ -17,15 +15,13 @@ TonelClassExtensionWriterTest >> setUp [
 			lineDelimiter: TonelWriter lineDelimiter
 ]
 
-{
-	#category : 'Test'
-}
+{ #category : 'Test' }
 TonelClassExtensionWriterTest >> testWriteClassExtension [
 
 	writer write: (TonelWriterClassExtensionDefinition of: TonelWriter extendedIn: TonelWriterTests).
 	self
-		assertFileSystemIncludesFileAt:  '\TonelWriter.extension.st';
-		assertContentsOfFileAt:  '\TonelWriter.extension.st'
+		assertFileSystemIncludesFileAt:  '/TonelWriter.extension.st';
+		assertContentsOfFileAt:  '/TonelWriter.extension.st'
 			equals:
 				'Extension {
 	#name : ''TonelWriter''
@@ -51,15 +47,13 @@ TonelWriter >> extensionForTest [
 '
 ]
 
-{
-	#category : 'Test'
-}
+{ #category : 'Test' }
 TonelClassExtensionWriterTest >> testWriteClassExtensionWithOtherExtensions [
 
 	writer write: (TonelWriterClassExtensionDefinition of: Object extendedIn: TonelWriterTests).
 	self
-		assertFileSystemIncludesFileAt: '\Object.extension.st';
-		assertContentsOfFileAt: '\Object.extension.st'
+		assertFileSystemIncludesFileAt: '/Object.extension.st';
+		assertContentsOfFileAt: '/Object.extension.st'
 			equals:
 				'Extension {
 	#name : ''Object''

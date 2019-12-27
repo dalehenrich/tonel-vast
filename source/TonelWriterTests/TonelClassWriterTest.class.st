@@ -4,9 +4,7 @@ Class {
 	#category : 'TonelWriterTests'
 }
 
-{
-	#category : 'Initialization'
-}
+{ #category : 'Initialization' }
 TonelClassWriterTest >> setUp [
 
 	super setUp.
@@ -17,15 +15,13 @@ TonelClassWriterTest >> setUp [
 			lineDelimiter: TonelWriter lineDelimiter)
 ]
 
-{
-	#category : 'Tests'
-}
+{ #category : 'Tests' }
 TonelClassWriterTest >> testWriteClass [
 
 	self writer write: (TonelWriterClassDefinition of: TonelMockB definedIn: TonelWriterTests).
 	self
-		assertFileSystemIncludesFileAt: '\TonelMockB.class.st';
-		assertContentsOfFileAt: '\TonelMockB.class.st'
+		assertFileSystemIncludesFileAt: '/TonelMockB.class.st';
+		assertContentsOfFileAt: '/TonelMockB.class.st'
 			equals:
 				'Class {
 	#name : ''TonelMockB'',
@@ -35,15 +31,13 @@ TonelClassWriterTest >> testWriteClass [
 '
 ]
 
-{
-	#category : 'Tests'
-}
+{ #category : 'Tests' }
 TonelClassWriterTest >> testWriteClassInSubApp [
 
 	self writer write: (TonelWriterClassDefinition of: TonelMockD definedIn: TonelSubapplication).
 	self
-		assertFileSystemIncludesFileAt: '\TonelMockD.class.st';
-		assertContentsOfFileAt: '\TonelMockD.class.st'
+		assertFileSystemIncludesFileAt: '/TonelMockD.class.st';
+		assertContentsOfFileAt: '/TonelMockD.class.st'
 			equals:
 				'Class {
 	#name : ''TonelMockD'',
@@ -63,15 +57,13 @@ TonelMockD >> withoutCategory [
 '
 ]
 
-{
-	#category : 'Tests'
-}
+{ #category : 'Tests' }
 TonelClassWriterTest >> testWriteClassInSubSubApp [
 
 	self writer write: (TonelWriterClassDefinition of: TonelMockH definedIn: TonelWriterTestSubSubApp).
 	self
-		assertFileSystemIncludesFileAt: '\TonelMockH.class.st';
-		assertContentsOfFileAt: '\TonelMockH.class.st'
+		assertFileSystemIncludesFileAt: '/TonelMockH.class.st';
+		assertContentsOfFileAt: '/TonelMockH.class.st'
 			equals:
 				'Class {
 	#name : ''TonelMockH'',
@@ -81,15 +73,13 @@ TonelClassWriterTest >> testWriteClassInSubSubApp [
 '
 ]
 
-{
-	#category : 'Tests'
-}
+{ #category : 'Tests' }
 TonelClassWriterTest >> testWriteClassSubclassingNil [
 
 	self writer write: (TonelWriterClassDefinition of: TonelMockE definedIn: TonelWriterTests).
 	self
-		assertFileSystemIncludesFileAt: '\TonelMockE.class.st';
-		assertContentsOfFileAt: '\TonelMockE.class.st'
+		assertFileSystemIncludesFileAt: '/TonelMockE.class.st';
+		assertContentsOfFileAt: '/TonelMockE.class.st'
 			equals:
 				'"
 I exists just for testing purpose
@@ -102,15 +92,13 @@ Class {
 '
 ]
 
-{
-	#category : 'Tests'
-}
+{ #category : 'Tests' }
 TonelClassWriterTest >> testWriteClassWithByteSubclass [
 
 	self writer write: (TonelWriterClassDefinition of: TonelBytesMock definedIn: TonelWriterTests).
 	self
-		assertFileSystemIncludesFileAt: '\TonelBytesMock.class.st';
-		assertContentsOfFileAt: '\TonelBytesMock.class.st'
+		assertFileSystemIncludesFileAt: '/TonelBytesMock.class.st';
+		assertContentsOfFileAt: '/TonelBytesMock.class.st'
 			equals:
 				'Class {
 #name : ''TonelBytesMock'',
@@ -121,15 +109,13 @@ TonelClassWriterTest >> testWriteClassWithByteSubclass [
 '
 ]
 
-{
-	#category : 'Tests'
-}
+{ #category : 'Tests' }
 TonelClassWriterTest >> testWriteClassWithCIassAndClassInstanceVariables [
 
 	self writer write: (TonelWriterClassDefinition of: TonelMockF definedIn: TonelWriterTests).
 	self
-		assertFileSystemIncludesFileAt: '\TonelMockF.class.st';
-		assertContentsOfFileAt: '\TonelMockF.class.st'
+		assertFileSystemIncludesFileAt: '/TonelMockF.class.st';
+		assertContentsOfFileAt: '/TonelMockF.class.st'
 			equals:
 				'Class {
 	#name : ''TonelMockF'',
@@ -145,15 +131,13 @@ TonelClassWriterTest >> testWriteClassWithCIassAndClassInstanceVariables [
 '
 ]
 
-{
-	#category : 'Tests'
-}
+{ #category : 'Tests' }
 TonelClassWriterTest >> testWriteClassWithComment [
 
 	self writer write: (TonelWriterClassDefinition of: TonelMockA definedIn: TonelWriterTests).
 	self
-		assertFileSystemIncludesFileAt: '\TonelMockA.class.st';
-		assertContentsOfFileAt: '\TonelMockA.class.st'
+		assertFileSystemIncludesFileAt: '/TonelMockA.class.st';
+		assertContentsOfFileAt: '/TonelMockA.class.st'
 			equals:
 				'"
 Class comment for tests
@@ -262,15 +246,13 @@ TonelMockA >> withMultipleCategories [
 '
 ]
 
-{
-	#category : 'Tests'
-}
+{ #category : 'Tests' }
 TonelClassWriterTest >> testWriteClassWithExtensionMethod [
 
 	self writer write: (TonelWriterClassDefinition of: TonelMockA definedIn: TonelWriterTests).
 	self
-		assertFileSystemIncludesFileAt: '\TonelMockA.class.st';
-		assertContentsOfFileAt: '\TonelMockA.class.st'
+		assertFileSystemIncludesFileAt: '/TonelMockA.class.st';
+		assertContentsOfFileAt: '/TonelMockA.class.st'
 			equals:
 		'"
 Class comment for tests
@@ -379,15 +361,13 @@ TonelMockA >> withMultipleCategories [
 '
 ]
 
-{
-	#category : 'Tests'
-}
+{ #category : 'Tests' }
 TonelClassWriterTest >> testWriteClassWithInstanceVariables [
 
 	self writer write: (TonelWriterClassDefinition of: TonelMockC definedIn: TonelWriterTests).
 	self
-		assertFileSystemIncludesFileAt: '\TonelMockC.class.st';
-		assertContentsOfFileAt: '\TonelMockC.class.st'
+		assertFileSystemIncludesFileAt: '/TonelMockC.class.st';
+		assertContentsOfFileAt: '/TonelMockC.class.st'
 			equals:
 				'Class {
 	#name : ''TonelMockC'',
@@ -401,15 +381,13 @@ TonelClassWriterTest >> testWriteClassWithInstanceVariables [
 '
 ]
 
-{
-	#category : 'Tests'
-}
+{ #category : 'Tests' }
 TonelClassWriterTest >> testWriteClassWithPoolDictionaryUsage [
 
 	self writer write: (TonelWriterClassDefinition of: TonelMockG definedIn: TonelWriterTests).
 	self
-		assertFileSystemIncludesFileAt: '\TonelMockG.class.st';
-		assertContentsOfFileAt: '\TonelMockG.class.st'
+		assertFileSystemIncludesFileAt: '/TonelMockG.class.st';
+		assertContentsOfFileAt: '/TonelMockG.class.st'
 			equals:
 				'Class {
 	#name : ''TonelMockG'',
@@ -430,15 +408,13 @@ TonelMockG >> methodWithPoolDictionaryUsage [
 '
 ]
 
-{
-	#category : 'Tests'
-}
+{ #category : 'Tests' }
 TonelClassWriterTest >> testWriteClassWithVariableSubclass [
 
 	self writer write: (TonelWriterClassDefinition of: TonelVariableMock definedIn: TonelWriterTests).
 	self
-		assertFileSystemIncludesFileAt: '\TonelVariableMock.class.st';
-		assertContentsOfFileAt: '\TonelVariableMock.class.st'
+		assertFileSystemIncludesFileAt: '/TonelVariableMock.class.st';
+		assertContentsOfFileAt: '/TonelVariableMock.class.st'
 			equals:
 				'Class {
 #name : ''TonelVariableMock'',
